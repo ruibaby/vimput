@@ -15,6 +15,7 @@ export const sharedConfig: UserConfig = {
   resolve: {
     alias: {
       "~/": `${r("src")}/`,
+      vue: "vue/dist/vue.esm-bundler.js",
     },
   },
   define: {
@@ -80,7 +81,7 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: r("extension/dist"),
     emptyOutDir: false,
-    sourcemap: isDev ? "inline" : false,
+    sourcemap: false,
     // https://developer.chrome.com/docs/webstore/program_policies/#:~:text=Code%20Readability%20Requirements
     terserOptions: {
       mangle: false,
