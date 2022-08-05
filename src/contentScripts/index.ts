@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-import { onMessage } from "webext-bridge";
 import { createApp, defineComponent } from "vue";
 import CodemirrorEditor from "~/components/CodemirrorEditor.vue";
 import browser from "webextension-polyfill";
@@ -22,24 +20,22 @@ import browser from "webextension-polyfill";
   shadowDOM.appendChild(root);
   document.body.appendChild(container);
 
-  console.info("[vitesse-webext] Hello world from content script");
+  const inputElements = document.querySelectorAll("input");
+  const textareaElements = document.querySelectorAll("textarea");
 
-  // communication example: send previous tab title from background page
-  onMessage("tab-prev", ({ data }) => {
-    console.log(`[vitesse-webext] Navigate from page "${data.title}"`);
+  inputElements.forEach((input) => {
+    bindKeyboardShortcuts(input);
   });
 
-  const inputDom = document.querySelectorAll("input");
+  textareaElements.forEach((textarea) => {
+    bindKeyboardShortcuts(textarea);
+  });
 
-  inputDom.forEach((input) => {
-    input.addEventListener("keyup", (e) => {
+  function bindKeyboardShortcuts(element: HTMLElement) {
+    element.addEventListener("keyup", (e) => {
       const target = e.target as HTMLInputElement;
 
       if (e.ctrlKey && e.code === "KeyI") {
-        console.log("[vitesse-webext] Ctrl+I", e);
-        e.preventDefault();
-        e.stopPropagation();
-
         const rootComponent = defineComponent({
           components: {
             CodemirrorEditor,
@@ -47,34 +43,29 @@ import browser from "webextension-polyfill";
           data() {
             return {
               value: target.value,
-              visible: false,
             };
           },
           template: `
-            <CodemirrorEditor :model-value="value" v-model:visible="visible" @change="handleChange"
-                              @close="handleClose"/>`,
-          mounted() {
-            setTimeout(() => {
-              this.visible = true;
-            }, 200);
-          },
+            <CodemirrorEditor :model-value="value" @change="onValueChange" @close="onClose"/>`,
           methods: {
-            handleChange(value) {
+            onValueChange(value) {
               target.value = value;
             },
-            handleClose() {
-              target.focus();
-              setTimeout(() => {
+            onClose() {
+              setTimeout(function () {
+                target.focus();
                 app.unmount();
-              }, 1000);
+              }, 100);
             },
           },
         });
 
         const app = createApp(rootComponent);
-
         app.mount(root);
+
+        e.preventDefault();
+        e.stopPropagation();
       }
     });
-  });
+  }
 })();

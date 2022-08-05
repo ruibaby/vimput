@@ -18,10 +18,6 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  visible: {
-    type: Boolean,
-    default: false,
-  },
   width: {
     type: Number,
     default: 700,
@@ -32,14 +28,8 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits([
-  "update:visible",
-  "update:modelValue",
-  "change",
-  "close",
-]);
+const emit = defineEmits(["update:modelValue", "change", "close"]);
 
-const rootVisible = ref(false);
 const modelWrapper = ref<HTMLElement>();
 const editorWrapper = shallowRef<HTMLDivElement>();
 const cmState = shallowRef<EditorState>();
@@ -64,7 +54,6 @@ const customTheme = EditorView.theme({
 });
 
 function handleClose() {
-  emit("update:visible", false);
   emit("close");
 }
 
@@ -122,6 +111,11 @@ onMounted(() => {
       }
     }
   );
+  nextTick(() => {
+    modelWrapper.value?.focus();
+    editorWrapper.value?.focus();
+    cmView.value?.focus();
+  });
 });
 
 onBeforeUnmount(() => {
@@ -129,23 +123,9 @@ onBeforeUnmount(() => {
     cmView.value.destroy();
   }
 });
-
-watch(
-  () => props.visible,
-  () => {
-    if (props.visible) {
-      nextTick(() => {
-        modelWrapper.value?.focus();
-        editorWrapper.value?.focus();
-        cmView.value?.focus();
-      });
-    }
-  }
-);
 </script>
 <template>
   <div
-    v-show="rootVisible"
     ref="modelWrapper"
     :class="wrapperClasses"
     aria-modal="true"
@@ -154,48 +134,24 @@ watch(
     tabindex="0"
     @keyup.esc="handleClose()"
   >
-    <transition
-      enter-active-class="ease-out duration-200"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="ease-in duration-100"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-      @before-enter="rootVisible = true"
-      @after-leave="rootVisible = false"
-    >
-      <div v-show="visible" class="modal-layer" @click="handleClose()" />
-    </transition>
-    <transition
-      enter-active-class="ease-out duration-200"
-      enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      enter-to-class="opacity-100 translate-y-0 sm:scale-100"
-      leave-active-class="ease-in duration-100"
-      leave-from-class="opacity-100 translate-y-0 sm:scale-100"
-      leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-    >
-      <div
-        v-show="visible"
-        :style="contentStyles"
-        class="modal-content transform transition-all"
-      >
-        <div class="modal-header">
-          <slot name="header">
-            <div class="modal-header-title">Vim Editor</div>
-            <div class="modal-header-actions flex flex-row">
-              <slot name="actions"></slot>
-              <div class="modal-header-action" @click="handleClose()">X</div>
-            </div>
-          </slot>
-        </div>
-        <div class="modal-body">
-          <div ref="editorWrapper" class="codemirror-wrapper contents"></div>
-        </div>
-        <div v-if="$slots.footer" class="modal-footer">
-          <slot name="footer" />
-        </div>
+    <div class="modal-layer" @click="handleClose()" />
+    <div :style="contentStyles" class="modal-content transform transition-all">
+      <div class="modal-header">
+        <slot name="header">
+          <div class="modal-header-title">Vim Editor</div>
+          <div class="modal-header-actions flex flex-row">
+            <slot name="actions"></slot>
+            <div class="modal-header-action" @click="handleClose()">X</div>
+          </div>
+        </slot>
       </div>
-    </transition>
+      <div class="modal-body">
+        <div ref="editorWrapper" class="codemirror-wrapper contents"></div>
+      </div>
+      <div v-if="$slots.footer" class="modal-footer">
+        <slot name="footer" />
+      </div>
+    </div>
   </div>
 </template>
 

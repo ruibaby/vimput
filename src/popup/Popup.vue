@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { storageDemo } from "~/logic/storage";
-import Logo from "~/components/Logo";
+import Logo from "~/components/Logo.vue";
 import browser from "webextension-polyfill";
 
 function openOptionsPage() {
