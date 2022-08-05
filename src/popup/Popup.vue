@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { storageDemo } from "~/logic/storage";
+import Logo from "~/components/Logo";
+import browser from "webextension-polyfill";
 
 function openOptionsPage() {
   // eslint-disable-next-line

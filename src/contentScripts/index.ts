@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 import { onMessage } from "webext-bridge";
-import { createApp } from "vue";
+import { createApp, defineComponent } from "vue";
 import CodemirrorEditor from "~/components/CodemirrorEditor.vue";
+import browser from "webextension-polyfill";
 
 // Firefox `browser.tabs.executeScript()` requires scripts return a primitive value
 (() => {
@@ -32,6 +33,8 @@ import CodemirrorEditor from "~/components/CodemirrorEditor.vue";
 
   inputDom.forEach((input) => {
     input.addEventListener("keyup", (e) => {
+      const target = e.target as HTMLInputElement;
+
       if (e.ctrlKey && e.code === "KeyI") {
         console.log("[vitesse-webext] Ctrl+I", e);
         e.preventDefault();
@@ -43,7 +46,7 @@ import CodemirrorEditor from "~/components/CodemirrorEditor.vue";
           },
           data() {
             return {
-              value: e.target.value,
+              value: target.value,
               visible: false,
             };
           },
@@ -57,10 +60,10 @@ import CodemirrorEditor from "~/components/CodemirrorEditor.vue";
           },
           methods: {
             handleChange(value) {
-              e.target.value = value;
+              target.value = value;
             },
             handleClose() {
-              e.target.focus();
+              target.focus();
               setTimeout(() => {
                 app.unmount();
               }, 1000);

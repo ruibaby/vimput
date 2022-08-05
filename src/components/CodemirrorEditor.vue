@@ -1,9 +1,16 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
-import { onBeforeUnmount, onMounted } from "vue-demi";
 import { vim, Vim } from "@replit/codemirror-vim";
 
 const props = defineProps({
